@@ -1,7 +1,7 @@
 var assign = require('object-assign');
 var React = require('react');
 var createElement = React.createElement;
-var PathComponent = require('./path');
+var $transclude = require('./transclude');
 
 var NOT_FOUND = '$not-found';
 var TRANSCLUDE = '$transclude';
@@ -11,7 +11,7 @@ module.exports = function(type, props, children, affordances, events, styles) {
   var controls = store.controls;
   var control = controls[type];
 
-  if (type === TRANSCLUDE) control = PathComponent;
+  if (type === TRANSCLUDE) return createElement($transclude, props, children);
 
   if (!control) return controls[NOT_FOUND] ? createElement(controls[NOT_FOUND], {type: type}) : null;
 

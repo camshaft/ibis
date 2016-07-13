@@ -15,7 +15,7 @@ function createContext(path, onChange, store, id) {
   };
 
   // subscribe to the initial path
-  var sub = store.subscribe(path, onUpdate);
+  var sub = path ? store.subscribe(path, onUpdate) : null;
 
   function setPath(newPath) {
     if (path === newPath) return null;
@@ -45,7 +45,7 @@ function createContext(path, onChange, store, id) {
   function render(children) {
     return fn ?
       fn(children) :
-      store.createElement('Container/Hidden', null, children);
+      null;
   }
 
   function destroy() {
