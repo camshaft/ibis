@@ -11,8 +11,13 @@ function createContext(path, onChange, store, id) {
     setPath: setPath,
     render: render,
     destroy: destroy,
+    send: send,
     _update: update
   };
+
+  function send(data, cb) {
+    return store.send(data, cb);
+  }
 
   // subscribe to the initial path
   var sub = path ? store.subscribe(path, onUpdate) : null;

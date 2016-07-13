@@ -46,7 +46,8 @@ module.exports = React.createClass({
       var context = self.initContext(component, i);
       components.push({
         path: component,
-        render: context.render
+        render: context.render,
+        send: context.send
       });
       i++;
       return component;

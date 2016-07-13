@@ -13,7 +13,7 @@ module.exports = function(client, onChange) {
         action.canReset = canCancel;
         action.isSubmitting = true;
 
-        request = client.submit(changeset.data, function(err, response) {
+        request = client.submit(changeset, function(err, response) {
           request = null;
           action.canReset = true;
           action.isSubmitting = false;
