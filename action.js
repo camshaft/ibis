@@ -4,7 +4,7 @@ module.exports = function(client, onChange) {
   return function createAction(name) {
     var request;
 
-    function action(changeset) {
+    function action(changeset, actionDone) {
       if (!canSubmit(changeset)) return null;
 
       return function submission(done) {
@@ -21,6 +21,7 @@ module.exports = function(client, onChange) {
           action.error = err;
           action.response = response;
           onChange(action, name);
+          if (typeof actionDone === 'function') actionDone(action);
           if (typeof done === 'function') done(action);
         });
 
