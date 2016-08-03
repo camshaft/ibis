@@ -1,4 +1,5 @@
 var stack = require('poe-ui/server');
+var webpack = require('webpack');
 
 module.exports = function(opts) {
   // TODO set options to remove loaders and set them up here
@@ -20,6 +21,10 @@ module.exports = function(opts) {
   builder.addLoader('jade', es6 + '!' + componentLoader + '!' + ast2template + '!jade2ast-loader');
 
   builder.addLoader('ess', essLoader + '!' + es6 + '!' + ast2template + '&keyName=false&pass-through=1!ess2ast-loader?urlRequire=1');
+
+  builder.plugins.push(new webpack.IgnorePlugin(/regenerator/));
+  builder.plugins.push(new webpack.IgnorePlugin(/nodent/));
+  builder.plugins.push(new webpack.IgnorePlugin(/js-beautify/));
 
   return app;
 };

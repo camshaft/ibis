@@ -1,94 +1,47 @@
-var createActionFactory = require('../action');
-var assign = require('object-assign');
+module.exports = function(proto, react) {
+  var createElement = react.createElement;
+  var types = react.PropTypes;
 
-var slice = [].slice;
+  var _render = proto.render;
 
-module.exports = function(component, React) {
-  var render = component.render;
-  var createElement = React.createElement;
-  var isValidElement = React.isValidElement;
+  return react.createClass(Object.assign({}, proto, {
+    displayName: proto.displayName,
 
-  var actionMixin = {
     contextTypes: {
-      send: React.PropTypes.func
+      action: types.func,
+      authenticate: types.func,
+      tree: types.object
     },
-    componentWillMount: componentWillMount,
-    getInitialState: function() {
-      return {};
-    }
-  };
 
-  function DOM(tag, props, children) {
-    var a = arguments;
+    affordance: function(name) {
+      var affordance = this.props[name];
+      if (!affordance) return null;
+      var schemas = this.context.tree.schemas;
+      return affordance(schemas);
+    },
 
-    if (tag === 'json') {
-      if (process.env.NODE_ENV === 'production') {
-        a = [false];
-      } else {
-        a = [
-          'pre',
-          props,
-          JSON.stringify(children, null, '  ')
-        ];
-      }
-    }
+    action: function(changeset) {
+      return function(evt) {
+        evt.preventDefault();
+        var action = this.context.action;
+        action(changeset.ref, changeset.data, function(err, res) {
+          console.log('ACTION RESPONSE', err, res);
+        });
+      }.bind(this);
+    },
 
-    return createElement.apply(null, a);
-  };
+    bindTargetValue: function(name) {
+      return function(evt) {
+        this.setState({[name]: evt.target.value});
+      }.bind(this);
+    },
 
-  return React.createClass(assign({}, component, {
-    mixins: [actionMixin],
     render: function() {
-      var props = this.props;
-
-      function _yield(name, context) {
-        var prop = props[name || 'children'];
-        if (typeof prop !== 'function') return prop;
-
-        var args = slice.call(arguments, 2);
-        return prop.apply(context, args);
-      }
-
-      var el = render.apply(this, [
-        DOM,
-        null,
-        props,
-        this.state || {},
-        _yield,
-        {},
-        {},
-        {},
-        function(){},
-        {}
-      ]);
-
-      return isValidElement(el) ? el : createElement('div', null, el);
+      var self = this;
+      var val = _render.call(self, createElement, null, self.props, self.state || {});
+      return Array.isArray(val) ?
+        createElement.apply(null, ['div', null].concat(val)) :
+        val;
     }
   }));
 };
-
-function componentWillMount() {
-  var self = this;
-
-  var createAction = createActionFactory({
-    submit: function(changeset, cb) {
-      return self.context.send(changeset, cb);
-    }
-    // TODO
-    //cancel: function() {
-    //  clearTimeout(id);
-    //}
-  }, function(client, name) {
-    if (!self.isMounted()) return null;
-    if (!name) return self.forceUpdate();
-    var nextState = {};
-    nextState[name] = client;
-    return self.setState(nextState);
-  });
-
-  self.$action = function(name) {
-    if (!name) return createAction();
-    var state = self.state;
-    return state[name] = state[name] || createAction(name);
-  };
-}

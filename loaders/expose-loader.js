@@ -4,7 +4,6 @@ var loaderUtils = require('loader-utils');
 
 exports = module.exports = function() {};
 exports.pitch = function(remainingRequest) {
-  this.cacheable();
   (new Routes(this, {}, remainingRequest)).compile(this.async());
 };
 

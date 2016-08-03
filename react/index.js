@@ -1,14 +1,12 @@
 var React = require('react');
 var createElement = React.createElement;
-var StoreContainer = require('./container');
-var Router = require('./router');
+var Application = require('./components/application');
 
-module.exports = function(store) {
-  return function(path) {
-    return createElement(StoreContainer, {
-      store: store
-    }, createElement(Router, {
-      path: path || ''
-    }));
+module.exports = function(config) {
+  return function createApp(src, props) {
+    return createElement(Application, Object.assign({
+      src: src,
+      props: props
+    }, config));
   };
 };
