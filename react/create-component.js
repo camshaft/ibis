@@ -15,19 +15,20 @@ module.exports = function(proto, react) {
 
     affordance: function(name) {
       var affordance = this.props[name];
-      if (!affordance) return null;
+      if (!affordance) return fakeAffordance(name);
       var schemas = this.context.tree.schemas;
       return affordance(schemas);
     },
 
-    action: function(changeset) {
-      return function(evt) {
-        evt.preventDefault();
-        var action = this.context.action;
-        action(changeset.ref, changeset.data, function(err, res) {
-          console.log('ACTION RESPONSE', err, res);
-        });
-      }.bind(this);
+    action: function(name) {
+      var self = this;
+      return function(changeset, done) {
+        return function(evt) {
+          if (evt) evt.preventDefault();
+          var action = self.context.action;
+          action(changeset.ref, changeset.data, done);
+        };
+      };
     },
 
     bindTargetValue: function(name) {
@@ -45,3 +46,12 @@ module.exports = function(proto, react) {
     }
   }));
 };
+
+function fakeAffordance(name) {
+  return function(data) {
+    return {
+      isValid: false,
+      data: data
+    };
+  };
+}

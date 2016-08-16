@@ -1,4 +1,5 @@
 var React = require('react');
+var createElement = React.createElement;
 var types = React.PropTypes;
 
 module.exports = React.createClass({
@@ -65,7 +66,7 @@ module.exports = React.createClass({
 
   },
 
-  notFound: function() {
+  notFound: function(message) {
 
   },
 
@@ -77,7 +78,7 @@ module.exports = React.createClass({
 
   },
 
-  error: function() {
+  error: function(message) {
 
   }
 });

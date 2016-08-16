@@ -10,7 +10,7 @@ var validator = new (require('ajv'))({
 });
 
 module.exports = function(opts) {
-  var controls = window.c = opts.controls;
+  var controls = opts.controls;
 
   function createElement(type) {
     var control = controls[type];
@@ -36,7 +36,9 @@ module.exports = function(opts) {
     Object.keys(codecs).forEach(function(key) {
       var constructor = codecs[key];
       codec.addExtUnpacker(+key, function(data) {
-        return constructor.apply(null, decode(data));
+        data = decode(data);
+        if (!Array.isArray(data)) data = [data];
+        return constructor.apply(null, data);
       });
     });
   };
@@ -55,6 +57,7 @@ function Affordance(ref, schema_id) {
     }
 
     affordance.ref = ref;
+    affordance.schema = fn.schema;
 
     return affordance;
   };
@@ -128,9 +131,10 @@ function convertPathType(type) {
   return pathTypes[type] || type;
 }
 
-function Schema(obj) {
-  var v = validator.compile(obj || {});
-  return function validate(data) {
+function Schema(schema) {
+  schema = schema || {};
+  var v = validator.compile(schema);
+  function validate(data) {
     if (data === undefined) data = null;
     data = JSON.parse(JSON.stringify(data));
     var isValid = v(data);
@@ -142,7 +146,12 @@ function Schema(obj) {
     return {
       isValid: isValid,
       errors: errors,
-      data: data
+      data: data,
+      schema: schema
     };
   };
+
+  validate.schema = schema;
+
+  return validate;
 }
