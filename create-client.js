@@ -53,12 +53,13 @@ function createHost(host, createConnection) {
   };
 }
 
+var slice = [].slice;
 function createInstance(conn, emitter, instance, path, props, app) {
   var actions = {};
   var authentications = {};
 
-  function call(name, message) {
-    if (app && app[name]) app[name](message);
+  function call(name) {
+    if (app && app[name]) app[name].apply(app, slice.call(arguments, 1));
   }
 
   function invokeCallback(callbacks, id, error, message) {
@@ -87,6 +88,19 @@ function createInstance(conn, emitter, instance, path, props, app) {
     unauthorized: function(_, message) {
       call('unauthorized', message);
     },
+
+    info: function(_, message) {
+      call('info', message);
+    },
+    call: function(_, message) {
+      call('call', message, function(err, data) {
+        var ref = message.ref;
+        err ?
+          conn.callError(instance, ref, '' + err) :
+          conn.callResponse(instance, ref, data);
+      });
+    },
+
     error: function(_, message) {
       call('error', message);
     },
