@@ -78,6 +78,20 @@ module.exports = React.createClass({
 
   },
 
+  info: function(message) {
+    var props = this.props;
+    var name = message.name;
+    var obj = {};
+    if (name === 'event') obj = props.events || {};
+    var data = message.data || {};
+    var call = obj[data.type];
+    if (call) call(data.props);
+  },
+
+  call: function(message, cb) {
+
+  },
+
   error: function(message) {
 
   }
