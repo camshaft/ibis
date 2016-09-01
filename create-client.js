@@ -13,7 +13,9 @@ var events = [
   'authenticationAcknowledged',
   'actionAcknowledged',
   'actionInvalid',
-  'error'
+  'error',
+  'info',
+  'call'
 ];
 
 var handler = events.reduce(function(acc, name) {
