@@ -32,7 +32,10 @@ Routes.prototype.compile = function(cb) {
         return '  ' + JSON.stringify(file.name) + ':' + 'require.resolve(' + JSON.stringify(file.request) + ')';
       }).join(',\n'),
       '};',
-      'Object.keys(modules).forEach(function(name) {Object.defineProperty(exports, name, {get: function() { return __webpack_require__(modules[name]).default; }})});',
+      'var extend = module.exports = function(exports) {',
+      '  Object.keys(modules).forEach(function(name) {Object.defineProperty(exports, name, {get: function() { return __webpack_require__(modules[name]).default; }})});\n',
+      '};',
+      'extend(module.exports)'
     ].join('\n');
 
     return cb(null, out);
