@@ -1,8 +1,9 @@
 var React = require('react');
 var createElement = React.createElement;
 var types = React.PropTypes;
+var URL = require('url');
 
-module.exports = React.createClass({
+var Application = module.exports = React.createClass({
   displayName: 'Application',
 
   componentWillMount: function() {
@@ -25,7 +26,9 @@ module.exports = React.createClass({
   childContextTypes: {
     action: types.func,
     authenticate: types.func,
-    tree: types.object
+    tree: types.object,
+    transclude: types.func,
+    appSrc: types.string
   },
 
   getChildContext: function() {
@@ -34,8 +37,25 @@ module.exports = React.createClass({
     return {
       action: client.action,
       authenticate: client.authenticate,
-      tree: this.state.tree
+      tree: this.state.tree,
+      transclude: this.transclude,
+      appSrc: props.src
     };
+  },
+
+  transclude: function(src, appProps) {
+    var props = this.props;
+
+    if (src && src.charAt(0) == '/') {
+      var url = URL.parse(src);
+      url.pathname = url.path = src;
+      src = URL.format(url);
+    }
+
+    return createElement(Application, Object.assign({}, props, {
+      src: src,
+      props: appProps
+    }));
   },
 
   getInitialState: function() {
@@ -45,12 +65,22 @@ module.exports = React.createClass({
           $root: null
         },
         schemas: {}
-      }
+      },
+      error: null
     };
   },
 
   render: function() {
-    return this.state.tree.components.$root;
+    var state = this.state;
+    var error = state.error;
+    return error ?
+      createElement('pre', {
+        style: {
+          color: 'red',
+          'font-family': 'monospace'
+        }
+      }, error) :
+      state.tree.components.$root;
   },
 
   // client callbacks
@@ -59,7 +89,7 @@ module.exports = React.createClass({
       return fun(acc);
     }, this.state.tree);
 
-    this.setState({tree: tree});
+    this.setState({tree: tree, error: null});
   },
 
   unmount: function() {
@@ -67,7 +97,7 @@ module.exports = React.createClass({
   },
 
   notFound: function(message) {
-
+    this.setState({error: 'Not found: ' + message.path});
   },
 
   authenticationRequired: function() {
@@ -93,6 +123,6 @@ module.exports = React.createClass({
   },
 
   error: function(message) {
-
+    this.setState({error: message.info});
   }
 });
