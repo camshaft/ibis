@@ -1,6 +1,6 @@
 {
   "name": "ibis",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "",
   "author": "Cameron Bytheway <bytheway.cameron@gmail.com>",
   "main": "app.js",
