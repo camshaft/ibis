@@ -1,4 +1,4 @@
-var objectPath = require('object-path');
+var objectPath = require('object-path-immutable');
 var PointerComponent = require('./components/pointer');
 var validator = new (require('ajv'))({
   allErrors: true,
@@ -30,7 +30,9 @@ module.exports = function(opts) {
       32: Path,
       35: OpRemove,
       36: OpReplace,
-      37: Schema
+      37: OpCopy,
+      38: Schema,
+      39: Subscription
     };
 
     Object.keys(codecs).forEach(function(key) {
@@ -47,19 +49,9 @@ module.exports = function(opts) {
 var slice = [].slice;
 
 function Affordance(ref, schema_id) {
-  return function(schemas) {
-    var fn = schemas[schema_id];
-
-    function affordance(data) {
-      var res = fn(data);
-      res.ref = ref;
-      return res;
-    }
-
-    affordance.ref = ref;
-    affordance.schema = fn.schema;
-
-    return affordance;
+  return {
+    ref: ref,
+    schema_id: schema_id
   };
 }
 
@@ -72,24 +64,13 @@ function ComponentPointer() {
 }
 
 function Element(type, props) {
-  var el = {
+  return {
     $$typeof: Symbol.for('react.element'),
     type: type,
     props: Object.assign({
       children: slice.call(arguments, 2)
     }, props)
   };
-
-  Object.defineProperty(el, 'children', {
-    get: function() {
-      return el.props.children;
-    },
-    set: function(value) {
-      el.props.children = value;
-    }
-  });
-
-  return el;
 }
 
 function Path() {
@@ -100,14 +81,12 @@ function Path() {
 
 function OpReplace(value, type) {
   arguments[1] = convertPathType(type);
-  var path = slice.call(arguments, 1);
+  var path = fixChildrenPath(arguments, 1);
 
   patch.value = value;
 
   function patch(obj) {
-    obj = obj || {};
-    objectPath.set(obj, path, value);
-    return obj;
+    return objectPath.set(obj || {}, path, value);
   }
 
   return patch;
@@ -115,12 +94,40 @@ function OpReplace(value, type) {
 
 function OpRemove(type) {
   arguments[0] = convertPathType(type);
-  var path = slice.call(arguments);
+  var path = fixChildrenPath(arguments);
   return function(obj) {
-    obj = obj || {};
-    objectPath.del(obj, path);
-    return obj;
+    return objectPath.del(obj || {}, path);
   };
+}
+
+function OpCopy(from, to) {
+  from[0] = convertPathType(from[0]);
+  to[0] = convertPathType(to[0]);
+  from = fixChildrenPath(from);
+  to = fixChildrenPath(to);
+
+  return function(obj, init) {
+    var value = getAtPath(init, from);
+    return objectPath.set(obj || {}, path, value);
+  };
+}
+
+function getAtPath(obj, path) {
+  for (var i = 0, parent = obj; i < path.length; i++) {
+    if (typeof parent !== 'object') return undefined;
+    parent = parent[path[i]];
+  }
+  return parent;
+}
+
+function fixChildrenPath(path, start) {
+  var acc = [];
+  for (var i = (start || 0), key; i < path.length; i++) {
+    key = path[i];
+    if (key == 'children') acc.push('props', 'children');
+    else acc.push(key);
+  }
+  return acc;
 }
 
 var pathTypes = {
@@ -154,4 +161,8 @@ function Schema(schema) {
   validate.schema = schema;
 
   return validate;
+}
+
+function Subscription(id) {
+  return id;
 }

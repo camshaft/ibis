@@ -2,13 +2,23 @@ var React = require('react');
 var createElement = React.createElement;
 var types = React.PropTypes;
 var URL = require('url');
+var Emitter = require('events');
 
 var Application = module.exports = React.createClass({
   displayName: 'Application',
 
   componentWillMount: function() {
-    var props = this.props;
-    this.client = props.createClient(props.src, props.props, this);
+    var self = this;
+    var props = self.props;
+    self.streams = new Emitter();
+    self.client = props.createClient(props.src, props.props, self);
+    if (process.env.NODE_ENV == 'development') {
+      this.history = [];
+      this.tt = function tt(i) {
+        if (i >= this.history.length) throw Error('History out of bounds');
+        this.setState({tree: this.history[i]});
+      };
+    }
   },
 
   componentWillReceiveProps: function(newProps) {
@@ -28,7 +38,8 @@ var Application = module.exports = React.createClass({
     authenticate: types.func,
     tree: types.object,
     transclude: types.func,
-    appSrc: types.string
+    appSrc: types.string,
+    streams: types.object
   },
 
   getChildContext: function() {
@@ -39,7 +50,8 @@ var Application = module.exports = React.createClass({
       authenticate: client.authenticate,
       tree: this.state.tree,
       transclude: this.transclude,
-      appSrc: props.src
+      appSrc: props.src,
+      streams: this.streams
     };
   },
 
@@ -85,9 +97,15 @@ var Application = module.exports = React.createClass({
 
   // client callbacks
   mount: function(message) {
+    var init = process.env.NODE_ENV == 'development' ?
+      this.history[0] :
+      this.state.tree;
+
     var tree = message.body.reduce(function(acc, fun) {
-      return fun(acc);
-    }, this.state.tree);
+      return fun(acc, init);
+    }, init);
+
+    if (process.env.NODE_ENV == 'development') this.history.unshift(tree);
 
     this.setState({tree: tree, error: null});
   },
@@ -109,11 +127,20 @@ var Application = module.exports = React.createClass({
   },
 
   info: function(message) {
-    var props = this.props;
+    var self = this;
+    var props = self.props;
     var name = message.name;
-    var obj = {};
-    if (name === 'event') obj = props.events || {};
     var data = message.data || {};
+    var obj = {};
+    if (name === '_emit') {
+      var streams = self.streams;
+      return Object.keys(data).forEach(function(id) {
+        data[id].forEach(function(event) {
+          streams.emit(id, event);
+        });
+      });
+    }
+    if (name === 'event') obj = props.events || {};
     var call = obj[data.type];
     if (call) call(data.props);
   },

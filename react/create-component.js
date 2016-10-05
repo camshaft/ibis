@@ -4,6 +4,9 @@ module.exports = function(proto, react) {
 
   var _render = proto.render;
 
+  var mixins = proto.mixins = proto.mixins || [];
+  mixins.unshift(require('./mixins/stream'));
+
   return react.createClass(Object.assign({}, proto, {
     displayName: proto.displayName,
 
@@ -14,10 +17,23 @@ module.exports = function(proto, react) {
     },
 
     affordance: function(name) {
-      var affordance = this.props[name];
-      if (!affordance) return fakeAffordance(name);
+      var info = this.props[name];
+      if (!info) return fakeAffordance(name);
       var schemas = this.context.tree.schemas;
-      return affordance(schemas);
+
+      var ref = info.ref;
+      var fn = schemas[info.schema_id];
+
+      function affordance(data) {
+        var res = fn(data);
+        res.ref = ref;
+        return res;
+      }
+
+      affordance.ref = ref;
+      affordance.schema = fn.schema;
+
+      return affordance;
     },
 
     action: function(name) {
