@@ -108,7 +108,7 @@ function OpCopy(from, to) {
 
   return function(obj, init) {
     var value = getAtPath(init, from);
-    return objectPath.set(obj || {}, path, value);
+    return objectPath.set(obj || {}, to, value);
   };
 }
 
