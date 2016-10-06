@@ -1,6 +1,6 @@
 var objectPath = require('object-path-immutable');
 var PointerComponent = require('./components/pointer');
-var validator = new (require('ajv'))({
+var validator = new (require('ajv/lib/ajv'))({
   allErrors: true,
   jsonPointers: true,
   coerceTypes: true,
@@ -63,15 +63,17 @@ function ComponentPointer() {
   );
 }
 
-function Element(type, props) {
-  return {
-    $$typeof: Symbol.for('react.element'),
-    type: type,
-    props: Object.assign({
-      children: slice.call(arguments, 2)
-    }, props)
+var Element = module.hot ?
+  require('react').createElement :
+  function Element(type, props) {
+    return {
+      $$typeof: Symbol.for('react.element'),
+      type: type,
+      props: Object.assign({
+        children: slice.call(arguments, 2)
+      }, props)
+    };
   };
-}
 
 function Path() {
   var path = slice.call(arguments);

@@ -23,9 +23,7 @@ module.exports = function(opts) {
   builder.addLoader(/\.(ess\?(dynamic|raw))$/, essLoader);
   builder.addLoader(/\.(ess)$/, require.resolve('style-loader') + '!' + essLoader);
 
-  builder.plugins.push(new webpack.IgnorePlugin(/regenerator/));
-  builder.plugins.push(new webpack.IgnorePlugin(/nodent/));
-  builder.plugins.push(new webpack.IgnorePlugin(/js-beautify/));
+  builder.plugins.push(new webpack.IgnorePlugin(/regenerator|nodent|js\-beautify/, /ajv/));
 
   return app;
 };

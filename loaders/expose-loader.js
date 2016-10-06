@@ -33,7 +33,7 @@ Routes.prototype.compile = function(cb) {
       }).join(',\n'),
       '};',
       'var extend = module.exports = function(exports) {',
-      '  Object.keys(modules).forEach(function(name) {Object.defineProperty(exports, name, {get: function() { return __webpack_require__(modules[name]).default; }})});\n',
+      '  Object.keys(modules).forEach(function(name) { exports[name] = __webpack_require__(modules[name]).default; });\n',
       '};',
       'extend(module.exports)'
     ].join('\n');
