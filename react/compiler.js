@@ -63,17 +63,19 @@ function ComponentPointer() {
   );
 }
 
-var Element = module.hot ?
-  require('react').createElement :
-  function Element(type, props) {
-    return {
-      $$typeof: Symbol.for('react.element'),
-      type: type,
-      props: Object.assign({
-        children: slice.call(arguments, 2)
-      }, props)
-    };
+function Element(type, props) {
+  if (module.hot) {
+    // We need to hook into any hot-module replacement proxies
+    type = require('react').createElement(type).type;
+  }
+  return {
+    $$typeof: Symbol.for('react.element'),
+    type: type,
+    props: Object.assign({
+      children: slice.call(arguments, 2)
+    }, props)
   };
+};
 
 function Path() {
   var path = slice.call(arguments);
