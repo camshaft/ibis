@@ -25,5 +25,10 @@ module.exports = function(opts) {
 
   builder.plugins.push(new webpack.IgnorePlugin(/regenerator|nodent|js\-beautify/, /ajv/));
 
+  // remove the weird resolving plugin in poe-ui-builder
+  builder.plugins = builder.plugins.filter(function(plugin) {
+    return plugin.constructor.name != 'ResolverPlugin';
+  });
+
   return app;
 };
