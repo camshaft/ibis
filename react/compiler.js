@@ -69,18 +69,18 @@ function Element(type, props) {
     type = require('react').createElement(type).type;
   }
   return {
-    $$typeof: Symbol.for('react.element'),
     type: type,
     props: Object.assign({
       children: slice.call(arguments, 2)
-    }, props)
+    }, props),
+    $$typeof: Symbol.for('react.element')
   };
 };
 
 function Path() {
   var path = slice.call(arguments);
   if (path.length === 1 && path[0].length == 0) return '$root';
-  return JSON.stringify(path);
+  return path;
 }
 
 function OpReplace(value, type) {

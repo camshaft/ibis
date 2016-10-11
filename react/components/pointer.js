@@ -11,6 +11,16 @@ module.exports = React.createClass({
     tree: types.object
   },
 
+  childContextTypes: {
+    componentPath: types.array
+  },
+
+  getChildContext: function() {
+    return {
+      componentPath: this.props.path
+    };
+  },
+
   render: function() {
     return this.context.tree.components[this.props.path];
   }
