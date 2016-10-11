@@ -1,6 +1,6 @@
 {
   "name": "ibis",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "",
   "author": "Cameron Bytheway <bytheway.cameron@gmail.com>",
   "main": "app.js",
@@ -11,10 +11,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/camshaft/ibis"
-  },
-  "engines": {
-    "node": "5.9.x",
-    "npm": "4.x.x"
   },
   "dependencies": {
     "ajv": "^4.1.5",
