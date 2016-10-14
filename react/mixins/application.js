@@ -11,7 +11,7 @@ module.exports = function(React) {
     affordance: function(name) {
       var info = this.props[name];
       if (!info) return fakeAffordance(name);
-      var schemas = this.context.tree.schemas;
+      var schemas = this.context.tree[1];
 
       var ref = info.ref;
       var fn = schemas[info.schema_id];

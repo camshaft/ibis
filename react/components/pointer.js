@@ -22,6 +22,6 @@ module.exports = React.createClass({
   },
 
   render: function() {
-    return this.context.tree.components[this.props.path];
+    return this.context.tree[0][this.props.path];
   }
 });

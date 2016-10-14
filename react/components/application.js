@@ -73,10 +73,10 @@ var Application = module.exports = React.createClass({
   getInitialState: function() {
     return {
       tree: {
-        components: {
+        0: { // components
           $root: null
         },
-        schemas: {}
+        1: {} // schemas
       },
       error: null
     };
@@ -92,7 +92,7 @@ var Application = module.exports = React.createClass({
           'font-family': 'monospace'
         }
       }, error) :
-      state.tree.components.$root;
+      state.tree[0].$root;
   },
 
   // client callbacks
@@ -101,9 +101,7 @@ var Application = module.exports = React.createClass({
       this.history[0] :
       this.state.tree;
 
-    var tree = message.body.reduce(function(acc, fun) {
-      return fun(acc, init);
-    }, init);
+    var tree = message.body(init);
 
     if (process.env.NODE_ENV == 'development') this.history.unshift(tree);
 
