@@ -36,6 +36,7 @@ var Application = module.exports = React.createClass({
   childContextTypes: {
     action: types.func,
     authenticate: types.func,
+    events: types.object,
     tree: types.object,
     transclude: types.func,
     appSrc: types.string,
@@ -48,6 +49,7 @@ var Application = module.exports = React.createClass({
     return {
       action: client.action,
       authenticate: client.authenticate,
+      events: props.events,
       tree: this.state.tree,
       transclude: this.transclude,
       appSrc: props.src,
@@ -101,7 +103,7 @@ var Application = module.exports = React.createClass({
       this.history[0] :
       this.state.tree;
 
-    var tree = message.body.reduce(function(acc, fun) {
+    var tree = message.body.reduceRight(function(acc, fun) {
       return fun(acc, init);
     }, init);
 
@@ -142,7 +144,9 @@ var Application = module.exports = React.createClass({
     }
     if (name === 'event') obj = props.events || {};
     var call = obj[data.type];
-    if (call) call(data.props);
+    if (call) return call(data.props);
+
+    console.warn('Unhandled info', data.type, data.props);
   },
 
   call: function(message, cb) {
