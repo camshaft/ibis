@@ -36,6 +36,7 @@ var Application = module.exports = React.createClass({
   childContextTypes: {
     action: types.func,
     authenticate: types.func,
+    componentPath: types.array,
     events: types.object,
     tree: types.object,
     transclude: types.func,
@@ -49,6 +50,7 @@ var Application = module.exports = React.createClass({
     return {
       action: client.action,
       authenticate: client.authenticate,
+      componentPath: [],
       events: props.events,
       tree: this.state.tree,
       transclude: this.transclude,
